@@ -80,6 +80,7 @@ vsite [options] <directory>
 | `--convert` | Converts incompatible videos (avi, mkv, mov) to MP4 |
 | `--gpu` | Uses NVIDIA GPU (NVENC) for faster conversion |
 | `-c, --clean` | Removes all generated HTML files from the directory |
+| `--clean-converted` | Removes converted MP4 files (keeps originals) |
 | `-h, --help` | Shows help |
 | `-v, --version` | Shows version |
 
@@ -109,10 +110,16 @@ Convert using NVIDIA GPU:
 vsite --convert --gpu /path/to/videos
 ```
 
-Clean generated files:
+Clean generated HTML files:
 
 ```bash
 vsite --clean /path/to/videos
+```
+
+Remove converted MP4 files (keep originals):
+
+```bash
+vsite --clean-converted /path/to/videos
 ```
 
 ## Serving videos
@@ -249,6 +256,7 @@ vsite/
 ├── go.mod                  # Go module
 ├── Makefile                # Build automation
 ├── README.md               # Documentation
+├── LICENSE                 # MIT License
 └── generator/
     ├── generator.go        # HTML generation logic
     └── templates/
@@ -258,4 +266,4 @@ vsite/
 
 ## License
 
-MIT License
+MIT License - see [LICENSE](LICENSE) file for details.

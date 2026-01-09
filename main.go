@@ -8,7 +8,7 @@ import (
 	"vsite/generator"
 )
 
-const version = "1.4.0"
+const version = "1.5.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -20,6 +20,7 @@ func main() {
 	var rootDir string
 	var title string
 	var cleanMode bool
+	var cleanConvertedMode bool
 	var convertMode bool
 	var useGPU bool
 
@@ -36,6 +37,8 @@ func main() {
 			os.Exit(0)
 		case "-c", "--clean":
 			cleanMode = true
+		case "--clean-converted":
+			cleanConvertedMode = true
 		case "--convert":
 			convertMode = true
 		case "--gpu":
@@ -80,6 +83,16 @@ func main() {
 		os.Exit(0)
 	}
 
+	if cleanConvertedMode {
+		count, err := gen.CleanConverted()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error cleaning converted files: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Done! %d converted files removed.\n", count)
+		os.Exit(0)
+	}
+
 	// Convert videos if requested
 	if convertMode {
 		if err := gen.ConvertVideos(useGPU); err != nil {
@@ -121,6 +134,7 @@ func printUsage() {
 Usage:
   vsite [options] <directory>
   vsite --clean <directory>
+  vsite --clean-converted <directory>
 
 Description:
   Scans the specified directory and subdirectories for video files,
@@ -137,6 +151,7 @@ Options:
   --gpu                Uses NVIDIA GPU (NVENC) for faster conversion
                        Requires: NVIDIA driver and ffmpeg with NVENC support
   -c, --clean          Removes all generated HTML files from the directory
+  --clean-converted    Removes converted MP4 files (keeps original avi, mkv, etc)
   -h, --help           Shows this help
   -v, --version        Shows version
 
@@ -158,5 +173,6 @@ Examples:
   vsite --title "My Collection" /path/to/videos
   vsite --convert /path/to/videos
   vsite --convert --gpu /path/to/videos
-  vsite --clean /path/to/videos`)
+  vsite --clean /path/to/videos
+  vsite --clean-converted /path/to/videos`)
 }

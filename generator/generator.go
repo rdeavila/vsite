@@ -764,6 +764,58 @@ func (g *Generator) Clean() (int, error) {
 	return count, nil
 }
 
+// CleanConverted removes MP4 files that were converted from other formats
+// (i.e., MP4 files that have a corresponding original file like .avi, .mkv, etc)
+func (g *Generator) CleanConverted() (int, error) {
+	count := 0
+
+	fmt.Println("Searching for converted files...")
+
+	err := filepath.Walk(g.rootDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			if strings.HasPrefix(info.Name(), ".") {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Check if it's an MP4 file
+		ext := strings.ToLower(filepath.Ext(path))
+		if ext != ".mp4" {
+			return nil
+		}
+
+		// Check if there's an original file (avi, mkv, mov, etc)
+		basePath := strings.TrimSuffix(path, ext)
+		originalExtensions := []string{".avi", ".mkv", ".mov", ".wmv", ".flv"}
+
+		for _, origExt := range originalExtensions {
+			originalPath := basePath + origExt
+			if _, err := os.Stat(originalPath); err == nil {
+				// Original exists, this MP4 was converted - remove it
+				if err := os.Remove(path); err != nil {
+					return fmt.Errorf("error removing %s: %w", path, err)
+				}
+				fmt.Printf("Removed: %s (original: %s)\n", filepath.Base(path), filepath.Base(originalPath))
+				count++
+				break
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return count, err
+	}
+
+	return count, nil
+}
+
 // ConvertVideos converts incompatible videos to MP4 using ffmpeg
 func (g *Generator) ConvertVideos(useGPU bool) error {
 	// Check if ffmpeg is installed

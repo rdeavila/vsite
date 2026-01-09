@@ -2,162 +2,431 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Playing: {{.Title}}">
-    <title>{{.Title}} | vsite</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* Plyr customizations */
-        .plyr {
-            --plyr-color-main: #6366f1;
-            --plyr-video-background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Playing: {{.Title}}">
+  <title>{{.Title}} | vsite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Video.js customizations */
+    .video-js {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16/9;
+      border-radius: 12px;
+      overflow: hidden;
+    }
 
-        .plyr--full-ui input[type=range] {
-            color: #6366f1;
-        }
+    .vjs-big-play-button {
+      background-color: rgba(99, 102, 241, 0.9) !important;
+      border: none !important;
+      border-radius: 50% !important;
+      width: 80px !important;
+      height: 80px !important;
+      line-height: 80px !important;
+      margin-top: -40px !important;
+      margin-left: -40px !important;
+    }
 
-        /* Fix for player before loading */
-        .video-player {
-            position: relative;
-            width: 100%;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
+    .vjs-big-play-button:hover {
+      background-color: #6366f1 !important;
+    }
 
-        .video-player .plyr {
-            width: 100%;
-        }
+    .video-js .vjs-control-bar {
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      height: 4em;
+    }
 
-        .video-player video {
-            width: 100%;
-            display: block;
-        }
+    .video-js .vjs-play-progress,
+    .video-js .vjs-volume-level {
+      background-color: #6366f1;
+    }
 
-        /* Hide duplicate controls when Plyr loads */
-        .plyr--video .plyr__controls {
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-        }
+    .video-js .vjs-slider:focus {
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+    }
 
-        /* Play button styling */
-        .plyr__control--overlaid {
-            background: rgba(99, 102, 241, 0.9) !important;
-        }
+    .video-player {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
 
-        .plyr__control--overlaid:hover {
-            background: #6366f1 !important;
-        }
-    </style>
+    /* Chromecast button */
+    .cast-button {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .cast-button:hover {
+      background: #818cf8;
+    }
+
+    .cast-button.available {
+      display: inline-flex;
+    }
+
+    .cast-button.disabled {
+      background: #4b5563;
+      cursor: not-allowed;
+    }
+
+    .cast-button svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .cast-status {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #22c55e;
+      color: white;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .cast-status.active {
+      display: inline-flex;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1f2937;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
 </head>
 
 <body data-prev="{{.PrevVideo}}" data-next="{{.NextVideo}}" data-back="{{.BackLink}}" data-hasprev="{{.HasPrev}}"
-    data-hasnext="{{.HasNext}}">
-    <div class="container">
-        <header class="header">
-            <a href="{{.BackLink}}" class="back-button">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                </svg>
-                Back
-            </a>
-            <h1>{{.Title}}</h1>
-        </header>
+  data-hasnext="{{.HasNext}}" data-videosrc="{{.VideoSrc}}" data-videotype="{{.VideoType}}" data-title="{{.Title}}">
+  <div class="container">
+    <header class="header">
+      <a href="{{.BackLink}}" class="back-button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back
+      </a>
+      <h1>{{.Title}}</h1>
+    </header>
 
-        <div class="player-wrapper">
-            <div class="video-player">
-                <video id="player" playsinline controls autoplay>
-                    <source src="{{.VideoSrc}}" type="{{.VideoType}}">
-                    Your browser does not support video playback.
-                </video>
-            </div>
+    <div class="player-wrapper">
+      <div class="video-player">
+        <video id="player" class="video-js vjs-big-play-centered" controls preload="auto" autoplay playsinline>
+          <source src="{{.VideoSrc}}" type="{{.VideoType}}">
+          <p class="vjs-no-js">
+            To view this video please enable JavaScript, and consider upgrading to a
+            web browser that supports HTML5 video.
+          </p>
+        </video>
+      </div>
 
-            <div class="player-controls">
-                <div class="nav-buttons">
-                    <a href="{{if .HasPrev}}{{.PrevVideo}}{{else}}#{{end}}"
-                        class="nav-button {{if not .HasPrev}}disabled{{end}}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M19 12H5M12 19l-7-7 7-7" />
-                        </svg>
-                        Previous
-                    </a>
-                    <a href="{{if .HasNext}}{{.NextVideo}}{{else}}#{{end}}"
-                        class="nav-button {{if not .HasNext}}disabled{{end}}">
-                        Next
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-                <span class="video-filename">{{.VideoName}}</span>
-            </div>
+      <div class="player-controls">
+        <div class="nav-buttons">
+          <a href="{{if .HasPrev}}{{.PrevVideo}}{{else}}#{{end}}" class="nav-button {{if not .HasPrev}}disabled{{end}}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Previous
+          </a>
+
+          <!-- Chromecast button -->
+          <button id="castButton" class="cast-button" title="Cast to Chromecast">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7zm0-4v2c4.97 0 9 4.03 9 9h2c0-6.08-4.93-11-11-11zm20-7H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
+            </svg>
+            <span id="castButtonText">Cast</span>
+          </button>
+
+          <div id="castStatus" class="cast-status">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7zm0-4v2c4.97 0 9 4.03 9 9h2c0-6.08-4.93-11-11-11zm20-7H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
+            </svg>
+            <span id="castDeviceName">Casting...</span>
+          </div>
+
+          <a href="{{if .HasNext}}{{.NextVideo}}{{else}}#{{end}}" class="nav-button {{if not .HasNext}}disabled{{end}}">
+            Next
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
         </div>
+        <span class="video-filename">{{.VideoName}}</span>
+      </div>
     </div>
+  </div>
 
-    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-    <script>
-        (function () {
-            // Initialize Plyr
-            var player = new Plyr('#player', {
-                controls: [
-                    'play-large',
-                    'play',
-                    'progress',
-                    'current-time',
-                    'duration',
-                    'mute',
-                    'volume',
-                    'captions',
-                    'settings',
-                    'pip',
-                    'airplay',
-                    'fullscreen'
-                ],
-                settings: ['captions', 'quality', 'speed'],
-                speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
-                keyboard: { focused: true, global: true }
-            });
+  <!-- Toast notification -->
+  <div id="toast" class="toast"></div>
 
-            // Custom keyboard navigation
-            var body = document.body;
-            var hasPrev = body.dataset.hasprev === "true";
-            var hasNext = body.dataset.hasnext === "true";
-            var prevVideo = body.dataset.prev;
-            var nextVideo = body.dataset.next;
-            var backLink = body.dataset.back;
+  <!-- Video.js -->
+  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
-            document.addEventListener("keydown", function (e) {
-                // Only navigate if not focused on player
-                if (e.target.closest('.plyr')) return;
+  <script>
+    (function () {
+      var player;
+      var castSession = null;
+      var castButton = document.getElementById('castButton');
+      var castButtonText = document.getElementById('castButtonText');
+      var castStatus = document.getElementById('castStatus');
+      var castDeviceName = document.getElementById('castDeviceName');
+      var toast = document.getElementById('toast');
+      var castState = 'NOT_CONNECTED';
+      var castAvailable = false;
 
-                if (e.key === "ArrowLeft" && hasPrev) {
-                    window.location.href = prevVideo;
-                } else if (e.key === "ArrowRight" && hasNext) {
-                    window.location.href = nextVideo;
-                } else if (e.key === "Escape") {
-                    window.location.href = backLink;
-                }
-            });
+      // Show toast message
+      function showToast(message, duration) {
+        duration = duration || 3000;
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(function () {
+          toast.classList.remove('show');
+        }, duration);
+      }
 
-            // Auto-next when video ends
-            player.on('ended', function () {
-                if (hasNext) {
-                    window.location.href = nextVideo;
-                }
-            });
-        })();
-    </script>
+      // Check if we're on HTTPS (required for Chromecast)
+      function canUseChromecast() {
+        return location.protocol === 'https:';
+      }
+
+      // Get absolute URL for the video (required for Chromecast)
+      function getAbsoluteVideoUrl() {
+        var src = document.body.dataset.videosrc;
+        if (src.startsWith('http://') || src.startsWith('https://')) {
+          return src;
+        }
+        return new URL(src, window.location.href).href;
+      }
+
+      // Initialize Video.js player
+      function initPlayer() {
+        player = videojs('player', {
+          controls: true,
+          autoplay: true,
+          preload: 'auto',
+          fluid: true,
+          playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+          controlBar: {
+            children: [
+              'playToggle',
+              'volumePanel',
+              'currentTimeDisplay',
+              'timeDivider',
+              'durationDisplay',
+              'progressControl',
+              'playbackRateMenuButton',
+              'pictureInPictureToggle',
+              'fullscreenToggle'
+            ]
+          }
+        });
+
+        // Keyboard navigation
+        var body = document.body;
+        var hasPrev = body.dataset.hasprev === "true";
+        var hasNext = body.dataset.hasnext === "true";
+        var prevVideo = body.dataset.prev;
+        var nextVideo = body.dataset.next;
+        var backLink = body.dataset.back;
+
+        document.addEventListener("keydown", function (e) {
+          if (e.target.closest('.video-js')) return;
+
+          if (e.key === "ArrowLeft" && hasPrev) {
+            window.location.href = prevVideo;
+          } else if (e.key === "ArrowRight" && hasNext) {
+            window.location.href = nextVideo;
+          } else if (e.key === "Escape") {
+            window.location.href = backLink;
+          }
+        });
+
+        // Auto-next when video ends
+        player.on('ended', function () {
+          if (hasNext) {
+            window.location.href = nextVideo;
+          }
+        });
+      }
+
+      // Initialize Chromecast
+      function initChromecast() {
+        if (!canUseChromecast()) {
+          console.log('Chromecast: requires HTTPS');
+          return;
+        }
+
+        // Show button immediately (always visible on HTTPS)
+        castButton.classList.add('available');
+
+        window['__onGCastApiAvailable'] = function (isAvailable) {
+          if (isAvailable) {
+            initializeCastApi();
+          } else {
+            castButton.classList.add('disabled');
+            castButtonText.textContent = 'Cast unavailable';
+          }
+        };
+
+        // Load Cast SDK
+        var script = document.createElement('script');
+        script.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
+        script.onerror = function () {
+          castButton.classList.add('disabled');
+          castButtonText.textContent = 'Cast unavailable';
+        };
+        document.head.appendChild(script);
+      }
+
+      function initializeCastApi() {
+        cast.framework.CastContext.getInstance().setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
+
+        var context = cast.framework.CastContext.getInstance();
+
+        // Update state when cast state changes
+        context.addEventListener(
+          cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+          function (event) {
+            castState = event.castState;
+
+            if (event.castState === cast.framework.CastState.NO_DEVICES_AVAILABLE) {
+              castAvailable = false;
+              castButtonText.textContent = 'No devices';
+            } else if (event.castState === cast.framework.CastState.NOT_CONNECTED) {
+              castAvailable = true;
+              castButtonText.textContent = 'Cast';
+              castButton.classList.remove('disabled');
+            } else if (event.castState === cast.framework.CastState.CONNECTING) {
+              castButtonText.textContent = 'Connecting...';
+            } else if (event.castState === cast.framework.CastState.CONNECTED) {
+              var session = context.getCurrentSession();
+              if (session) {
+                castDeviceName.textContent = 'Casting to ' + session.getCastDevice().friendlyName;
+                castStatus.classList.add('active');
+                castButton.classList.remove('available');
+              }
+            }
+
+            // Show/hide status
+            if (event.castState !== cast.framework.CastState.CONNECTED) {
+              castStatus.classList.remove('active');
+              castButton.classList.add('available');
+            }
+          }
+        );
+
+        // Cast button click handler
+        castButton.addEventListener('click', function () {
+          if (castState === cast.framework.CastState.NO_DEVICES_AVAILABLE) {
+            showToast('No Chromecast devices found. Make sure your device is on the same network.');
+            return;
+          }
+
+          if (castState === cast.framework.CastState.CONNECTED) {
+            // Disconnect
+            var session = context.getCurrentSession();
+            if (session) {
+              session.endSession(true);
+            }
+            return;
+          }
+
+          context.requestSession().then(
+            function () {
+              var session = context.getCurrentSession();
+              if (session) {
+                loadMedia(session);
+              }
+            },
+            function (error) {
+              if (error.code === 'cancel') {
+                // User cancelled, do nothing
+              } else if (error.code === 'no_devices_available') {
+                showToast('No Chromecast devices found. Check your network connection.');
+              } else {
+                showToast('Could not connect to Chromecast: ' + error.description);
+              }
+            }
+          );
+        });
+      }
+
+      function loadMedia(session) {
+        var mediaInfo = new chrome.cast.media.MediaInfo(
+          getAbsoluteVideoUrl(),
+          document.body.dataset.videotype
+        );
+        mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
+        mediaInfo.metadata.title = document.body.dataset.title;
+
+        var request = new chrome.cast.media.LoadRequest(mediaInfo);
+        request.currentTime = player ? player.currentTime() : 0;
+        request.autoplay = true;
+
+        session.loadMedia(request).then(
+          function () {
+            showToast('Playing on ' + session.getCastDevice().friendlyName);
+            if (player) {
+              player.pause();
+            }
+          },
+          function (error) {
+            showToast('Error loading video on Chromecast. Check if the video format is supported.');
+            console.log('Error loading media:', error);
+          }
+        );
+      }
+
+      // Initialize everything
+      initPlayer();
+      initChromecast();
+    })();
+  </script>
 </body>
 
 </html>

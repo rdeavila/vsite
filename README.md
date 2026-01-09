@@ -236,13 +236,14 @@ sudo dnf install akmod-nvidia
 
 ## Player
 
-The player uses the [Plyr](https://plyr.io/) library and offers:
+The player uses the [Video.js](https://videojs.com/) library and offers:
 
 - Playback controls (play, pause, volume, fullscreen)
-- Progress bar with preview
+- Progress bar with seeking
 - Speed control (0.5x to 2x)
 - Picture-in-Picture
 - Navigation between videos in the same directory
+- Chromecast support (when served over HTTPS on a public domain)
 
 ### Keyboard shortcuts
 

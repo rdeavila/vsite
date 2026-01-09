@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Video gallery - {{.Title}}">
+  <title>{{.Title}} | vsite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      {{if .HasParent}}
+      <a href="{{.ParentPath}}" class="back-button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back
+      </a>
+      {{end}}
+      <h1>{{.Title}}</h1>
+    </header>
+
+    {{if .Directories}}
+    <section>
+      <div class="directories-grid">
+        {{range .Directories}}
+        <a href="{{.Path}}" class="dir-card">
+          <span class="dir-icon">📂</span>
+          <span class="dir-name">{{.Name}}</span>
+        </a>
+        {{end}}
+      </div>
+    </section>
+    {{end}}
+
+    {{if .Videos}}
+    <section>
+      <div class="videos-grid">
+        {{range .Videos}}
+        <a href="{{.PlayerPage}}" class="video-card">
+          <div class="video-thumbnail">
+            <div class="play-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+          <div class="video-info">
+            <h3 class="video-title">{{.Name}}</h3>
+            <span class="video-meta">{{.Extension}}</span>
+          </div>
+        </a>
+        {{end}}
+      </div>
+    </section>
+    {{end}}
+
+    {{if and (not .Directories) (not .Videos)}}
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M15 10l-4 4l-4-4" />
+        <path d="M3 6v12a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+      </svg>
+      <p>No videos found in this folder</p>
+    </div>
+    {{end}}
+  </div>
+</body>
+
+</html>

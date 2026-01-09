@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Playing: {{.Title}}">
+    <title>{{.Title}} | vsite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Plyr customizations */
+        .plyr {
+            --plyr-color-main: #6366f1;
+            --plyr-video-background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .plyr--full-ui input[type=range] {
+            color: #6366f1;
+        }
+
+        /* Fix for player before loading */
+        .video-player {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-player .plyr {
+            width: 100%;
+        }
+
+        .video-player video {
+            width: 100%;
+            display: block;
+        }
+
+        /* Hide duplicate controls when Plyr loads */
+        .plyr--video .plyr__controls {
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        }
+
+        /* Play button styling */
+        .plyr__control--overlaid {
+            background: rgba(99, 102, 241, 0.9) !important;
+        }
+
+        .plyr__control--overlaid:hover {
+            background: #6366f1 !important;
+        }
+    </style>
+</head>
+
+<body data-prev="{{.PrevVideo}}" data-next="{{.NextVideo}}" data-back="{{.BackLink}}" data-hasprev="{{.HasPrev}}"
+    data-hasnext="{{.HasNext}}">
+    <div class="container">
+        <header class="header">
+            <a href="{{.BackLink}}" class="back-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back
+            </a>
+            <h1>{{.Title}}</h1>
+        </header>
+
+        <div class="player-wrapper">
+            <div class="video-player">
+                <video id="player" playsinline controls autoplay>
+                    <source src="{{.VideoSrc}}" type="{{.VideoType}}">
+                    Your browser does not support video playback.
+                </video>
+            </div>
+
+            <div class="player-controls">
+                <div class="nav-buttons">
+                    <a href="{{if .HasPrev}}{{.PrevVideo}}{{else}}#{{end}}"
+                        class="nav-button {{if not .HasPrev}}disabled{{end}}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                    </a>
+                    <a href="{{if .HasNext}}{{.NextVideo}}{{else}}#{{end}}"
+                        class="nav-button {{if not .HasNext}}disabled{{end}}">
+                        Next
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+                <span class="video-filename">{{.VideoName}}</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <script>
+        (function () {
+            // Initialize Plyr
+            var player = new Plyr('#player', {
+                controls: [
+                    'play-large',
+                    'play',
+                    'progress',
+                    'current-time',
+                    'duration',
+                    'mute',
+                    'volume',
+                    'captions',
+                    'settings',
+                    'pip',
+                    'airplay',
+                    'fullscreen'
+                ],
+                settings: ['captions', 'quality', 'speed'],
+                speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+                keyboard: { focused: true, global: true }
+            });
+
+            // Custom keyboard navigation
+            var body = document.body;
+            var hasPrev = body.dataset.hasprev === "true";
+            var hasNext = body.dataset.hasnext === "true";
+            var prevVideo = body.dataset.prev;
+            var nextVideo = body.dataset.next;
+            var backLink = body.dataset.back;
+
+            document.addEventListener("keydown", function (e) {
+                // Only navigate if not focused on player
+                if (e.target.closest('.plyr')) return;
+
+                if (e.key === "ArrowLeft" && hasPrev) {
+                    window.location.href = prevVideo;
+                } else if (e.key === "ArrowRight" && hasNext) {
+                    window.location.href = nextVideo;
+                } else if (e.key === "Escape") {
+                    window.location.href = backLink;
+                }
+            });
+
+            // Auto-next when video ends
+            player.on('ended', function () {
+                if (hasNext) {
+                    window.location.href = nextVideo;
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

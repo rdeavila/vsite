@@ -21,6 +21,7 @@ func main() {
 	var title string
 	var cleanMode bool
 	var cleanConvertedMode bool
+	var cleanOriginalMode bool
 	var convertMode bool
 	var useGPU bool
 
@@ -39,6 +40,8 @@ func main() {
 			cleanMode = true
 		case "--clean-converted":
 			cleanConvertedMode = true
+		case "--clean-original":
+			cleanOriginalMode = true
 		case "--convert":
 			convertMode = true
 		case "--gpu":
@@ -93,6 +96,16 @@ func main() {
 		os.Exit(0)
 	}
 
+	if cleanOriginalMode {
+		count, err := gen.CleanOriginal()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error cleaning original files: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Done! %d original files removed.\n", count)
+		os.Exit(0)
+	}
+
 	// Convert videos if requested
 	if convertMode {
 		if err := gen.ConvertVideos(useGPU); err != nil {
@@ -135,6 +148,7 @@ Usage:
   vsite [options] <directory>
   vsite --clean <directory>
   vsite --clean-converted <directory>
+  vsite --clean-original <directory>
 
 Description:
   Scans the specified directory and subdirectories for video files,
@@ -152,6 +166,7 @@ Options:
                        Requires: NVIDIA driver and ffmpeg with NVENC support
   -c, --clean          Removes all generated HTML files from the directory
   --clean-converted    Removes converted MP4 files (keeps original avi, mkv, etc)
+  --clean-original     Removes original files that were converted (keeps MP4)
   -h, --help           Shows this help
   -v, --version        Shows version
 
@@ -174,5 +189,6 @@ Examples:
   vsite --convert /path/to/videos
   vsite --convert --gpu /path/to/videos
   vsite --clean /path/to/videos
-  vsite --clean-converted /path/to/videos`)
+  vsite --clean-converted /path/to/videos
+  vsite --clean-original /path/to/videos`)
 }

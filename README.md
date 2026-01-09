@@ -25,7 +25,7 @@ playing videos in the browser.
 ### Building from source
 
 ```bash
-git clone https://github.com/your-user/vsite.git
+git clone https://github.com/rdeavila/vsite.git
 cd vsite
 make build
 ```
@@ -33,23 +33,23 @@ make build
 ### Build targets
 
 ```bash
-make              # Build optimized binary (default)
-make build        # Build optimized binary
-make build-debug  # Build with debug symbols
-make build-all    # Build for all platforms
-make build-linux  # Build for Linux amd64
-make build-darwin # Build for macOS arm64
-make build-windows# Build for Windows amd64
-make clean        # Remove build artifacts
-make test         # Run tests
-make deps         # Download dependencies
-make install      # Install to /usr/local/bin
-make install-user # Install to ~/.local/bin
-make uninstall    # Uninstall
-make info         # Show binary information
-make compress     # Compress with UPX
-make serve        # Start HTTP server with video seeking support
-make help         # Show help
+make               # Build optimized binary (default)
+make build         # Build optimized binary
+make build-debug   # Build with debug symbols
+make build-all     # Build for all platforms
+make build-linux   # Build for Linux amd64
+make build-darwin  # Build for macOS arm64
+make build-windows # Build for Windows amd64
+make clean         # Remove build artifacts
+make test          # Run tests
+make deps          # Download dependencies
+make install       # Install to /usr/local/bin
+make install-user  # Install to ~/.local/bin
+make uninstall     # Uninstall
+make info          # Show binary information
+make compress      # Compress with UPX
+make serve         # Start HTTP server with video seeking support
+make help          # Show help
 ```
 
 ### Optional dependencies
@@ -81,6 +81,7 @@ vsite [options] <directory>
 | `--gpu` | Uses NVIDIA GPU (NVENC) for faster conversion |
 | `-c, --clean` | Removes all generated HTML files from the directory |
 | `--clean-converted` | Removes converted MP4 files (keeps originals) |
+| `--clean-original` | Removes original files that were converted (keeps MP4) |
 | `-h, --help` | Shows help |
 | `-v, --version` | Shows version |
 
@@ -120,6 +121,12 @@ Remove converted MP4 files (keep originals):
 
 ```bash
 vsite --clean-converted /path/to/videos
+```
+
+Remove original files that were converted (keep MP4):
+
+```bash
+vsite --clean-original /path/to/videos
 ```
 
 ## Serving videos

@@ -286,9 +286,39 @@
         // Auto-next when video ends
         player.on('ended', function () {
           if (hasNext) {
+            // Save fullscreen state before navigating
+            if (player.isFullscreen()) {
+              sessionStorage.setItem('vsite_fullscreen', 'true');
+            } else {
+              sessionStorage.removeItem('vsite_fullscreen');
+            }
+            // Save Picture-in-Picture state before navigating
+            if (player.isInPictureInPicture()) {
+              sessionStorage.setItem('vsite_pip', 'true');
+            } else {
+              sessionStorage.removeItem('vsite_pip');
+            }
             window.location.href = nextVideo;
           }
         });
+
+        // Restore fullscreen state if coming from a previous video
+        if (sessionStorage.getItem('vsite_fullscreen') === 'true') {
+          sessionStorage.removeItem('vsite_fullscreen');
+          // Wait for player to be ready and video to start playing
+          player.one('playing', function () {
+            player.requestFullscreen();
+          });
+        }
+
+        // Restore Picture-in-Picture state if coming from a previous video
+        if (sessionStorage.getItem('vsite_pip') === 'true') {
+          sessionStorage.removeItem('vsite_pip');
+          // Wait for player to be ready and video to start playing
+          player.one('playing', function () {
+            player.requestPictureInPicture();
+          });
+        }
       }
 
       // Initialize Chromecast

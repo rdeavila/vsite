@@ -1,0 +1,23 @@
+# nfpm configuration for vsite RPM package
+# https://nfpm.goreleaser.com/configuration/
+
+name: vsite
+arch: x86_64
+platform: linux
+version: ${VERSION}
+release: 1
+
+maintainer: "Rodrigo de Avila <rpm@rda.run>"
+description: |
+  Static HTML video gallery generator.
+  A command-line tool that generates beautiful, responsive HTML galleries
+  from video files with support for Video.js player, Chromecast, and more.
+vendor: Rodrigo de Avila
+homepage: https://github.com/rdeavila/vsite
+license: MIT
+
+contents:
+  - src: ./vsite
+    dst: /usr/bin/vsite
+    file_info:
+      mode: 0755

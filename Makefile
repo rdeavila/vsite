@@ -4,8 +4,8 @@
 # Binary name
 BINARY_NAME := vsite
 
-# Version from main.go
-VERSION := 1.4.0
+# Version from .version file
+VERSION := $(shell cat .version)
 
 # Build directory
 BUILD_DIR := build
@@ -33,7 +33,7 @@ PLATFORMS := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
 .DEFAULT_GOAL := build
 
 # Phony targets
-.PHONY: all build build-all clean test deps install uninstall help serve
+.PHONY: all build build-all clean test deps install uninstall help serve rpm
 
 # Build for current platform with optimizations
 build:
@@ -145,6 +145,14 @@ compress: build
 		echo "UPX not found. Install with: sudo apt install upx"; \
 	fi
 
+# Build RPM package
+rpm: build
+	@echo "Building RPM package..."
+	@mkdir -p $(BUILD_DIR)
+	VERSION=$(VERSION) nfpm package --packager rpm --target $(BUILD_DIR)/
+	@echo "Done! RPM package in $(BUILD_DIR)/"
+	@ls -lh $(BUILD_DIR)/*.rpm
+
 # Start HTTP server with range request support (for video seeking)
 serve:
 	@echo "Starting HTTP server with range request support..."
@@ -174,5 +182,6 @@ help:
 	@echo "  uninstall     Remove from /usr/local/bin"
 	@echo "  info          Show binary information"
 	@echo "  compress      Compress binary with UPX"
+	@echo "  rpm           Build RPM package (requires nfpm)"
 	@echo "  serve         Start HTTP server with range request support"
 	@echo "  help          Show this help"

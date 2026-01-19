@@ -8,7 +8,8 @@ import (
 	"vsite/generator"
 )
 
-const version = "1.5.0"
+// version is set via ldflags at build time (see Makefile)
+var version = "dev"
 
 func main() {
 	if len(os.Args) < 2 {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
   <meta charset="UTF-8">
@@ -9,14 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <!-- daisyUI + Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+  </style>
 </head>
 
-<body>
-  <div class="container">
-    <header class="header">
+<body class="bg-base-100 text-base-content min-h-screen">
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <header class="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-base-300">
       {{if .HasParent}}
-      <a href="{{.ParentPath}}" class="back-button">
+      <a href="{{.ParentPath}}" class="btn btn-ghost btn-sm gap-2">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -24,16 +31,35 @@
         Back
       </a>
       {{end}}
-      <h1>{{.Title}}</h1>
+      <h1 class="text-2xl md:text-3xl font-bold text-base-content flex-1">{{.Title}}</h1>
+
+      <!-- Theme Toggle -->
+      <label class="swap swap-rotate">
+        <!-- this hidden checkbox controls the state -->
+        <input type="checkbox" class="theme-controller" value="light" />
+        <!-- sun icon - shows when checked (light mode) -->
+        <svg class="swap-on h-8 w-8 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+        </svg>
+        <!-- moon icon - shows when unchecked (dark mode) -->
+        <svg class="swap-off h-8 w-8 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+        </svg>
+      </label>
     </header>
 
     {{if .Directories}}
-    <section>
-      <div class="directories-grid">
+    <section class="mb-10">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         {{range .Directories}}
-        <a href="{{.Path}}" class="dir-card">
-          <span class="dir-icon">📂</span>
-          <span class="dir-name">{{.Name}}</span>
+        <a href="{{.Path}}"
+          class="card bg-base-200 hover:bg-base-300 border border-base-300 hover:border-primary transition-all duration-200 hover:-translate-y-1">
+          <div class="card-body p-4 flex flex-row items-center gap-3">
+            <span class="text-2xl">📂</span>
+            <span class="font-medium text-sm truncate">{{.Name}}</span>
+          </div>
         </a>
         {{end}}
       </div>
@@ -42,19 +68,24 @@
 
     {{if .Videos}}
     <section>
-      <div class="videos-grid">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {{range .Videos}}
-        <a href="{{.PlayerPage}}" class="video-card">
-          <div class="video-thumbnail">
-            <div class="play-icon">
-              <svg viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
+        <a href="{{.PlayerPage}}"
+          class="card bg-base-200 border border-base-300 hover:border-primary transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
+          <figure class="relative aspect-video bg-base-300 overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div
+                class="w-14 h-14 rounded-full bg-base-100/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-primary group-hover:scale-110 transition-all duration-200">
+                <svg class="w-6 h-6 fill-current ml-0.5" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
             </div>
-          </div>
-          <div class="video-info">
-            <h3 class="video-title">{{.Name}}</h3>
-            <span class="video-meta">{{.Extension}}</span>
+          </figure>
+          <div class="card-body p-4">
+            <h3 class="card-title text-sm font-medium line-clamp-2">{{.Name}}</h3>
+            <span class="badge badge-ghost badge-sm uppercase">{{.Extension}}</span>
           </div>
         </a>
         {{end}}
@@ -63,8 +94,8 @@
     {{end}}
 
     {{if and (not .Directories) (not .Videos)}}
-    <div class="empty-state">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <div class="flex flex-col items-center justify-center py-16 text-base-content/60">
+      <svg class="w-16 h-16 mb-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M15 10l-4 4l-4-4" />
         <path d="M3 6v12a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
       </svg>
@@ -72,6 +103,25 @@
     </div>
     {{end}}
   </div>
+
+  <script>
+    // Persist theme preference
+    (function () {
+      const savedTheme = localStorage.getItem('vsite-theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'light') {
+          document.querySelector('.theme-controller').checked = true;
+        }
+      }
+
+      document.querySelector('.theme-controller').addEventListener('change', function (e) {
+        const theme = e.target.checked ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('vsite-theme', theme);
+      });
+    })();
+  </script>
 </body>
 
 </html>

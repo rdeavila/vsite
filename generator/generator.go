@@ -149,11 +149,6 @@ func (g *Generator) Generate() error {
 		return fmt.Errorf("error generating player pages: %w", err)
 	}
 
-	// Generate CSS
-	if err := g.generateStylesheet(); err != nil {
-		return fmt.Errorf("error generating stylesheet: %w", err)
-	}
-
 	fmt.Printf("Files generated in: %s\n", g.outputDir)
 	return nil
 }
